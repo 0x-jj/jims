@@ -3,7 +3,8 @@ const { MODE } = require(`${basePath}/constants/blend_mode.js`);
 const fs = require('fs');
 
 const namePrefix = 'Jim';
-const description = 'Remember to replace this description';
+const description =
+  'A collection of 1024 unique Jims, made with <3 by FingerprintsDAO.';
 const baseUri = 'ipfs://NewUriToReplace';
 
 const layerConfigurations = [
