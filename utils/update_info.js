@@ -1,5 +1,4 @@
 const basePath = process.cwd();
-const { NETWORK } = require(`${basePath}/constants/network.js`);
 const fs = require('fs');
 
 const {
@@ -15,7 +14,9 @@ let data = JSON.parse(rawdata);
 data.forEach((item) => {
   item.name = `${namePrefix} #${item.edition}`;
   item.description = description;
-  item.image = `${baseUri}/${item.edition}.png`;
+  const fileExt = item.image.split('.').pop();
+
+  item.image = `${baseUri}/${item.edition}.${fileExt}`;
 
   fs.writeFileSync(
     `${basePath}/build/json/${item.edition}.json`,
