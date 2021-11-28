@@ -87,7 +87,7 @@ for (var layer in rarityData) {
   }
 }
 
-fs.appendFileSync('rarity.csv', 'trait_type,trait,occurrence,rarity_percent\n');
+fs.writeFileSync('rarity.csv', 'trait_type,trait,occurrence,rarity_percent\n');
 
 // print out rarity data
 for (var layer in rarityData) {

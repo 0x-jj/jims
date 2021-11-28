@@ -126,6 +126,7 @@ const addMetadata = (_dna, _edition) => {
     description: description,
     image: `${baseUri}/${_edition}.png`,
     dna: sha1(_dna),
+    edition: _edition,
     ...extraMetadata,
     attributes: attributesList,
   };

@@ -1,7 +1,7 @@
 {
   "name": "the_jims",
-  "version": "1.0",
-  "description": "Engine to create layer based randomly generated art",
+  "version": "1.0.0",
+  "description": "Engine to create layer based randomly generated toad jims.",
   "main": "index.js",
   "bin": "index.js",
   "pkg": {
