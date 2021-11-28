@@ -8,12 +8,29 @@ const baseUri = 'ipfs://NewUriToReplace';
 
 const layerConfigurations = [
   {
-    growEditionSizeTo: 1,
+    growEditionSizeTo: 8,
     layersOrder: [
       {
         name: 'special',
         options: {
           displayName: 'Special',
+        },
+      },
+    ],
+  },
+  {
+    growEditionSizeTo: 10,
+    layersOrder: [
+      {
+        name: 'gifs',
+        options: {
+          displayName: 'Special',
+        },
+      },
+      {
+        name: 'animated',
+        options: {
+          displayName: 'Animated',
         },
       },
     ],

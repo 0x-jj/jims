@@ -120,11 +120,11 @@ const drawBackground = () => {
   ctx.fillRect(0, 0, format.width, format.height);
 };
 
-const addMetadata = (_dna, _edition) => {
+const addMetadata = (_dna, _edition, fileExtension) => {
   let tempMetadata = {
     name: `${namePrefix} #${_edition}`,
     description: description,
-    image: `${baseUri}/${_edition}.png`,
+    image: `${baseUri}/${_edition}.${fileExtension}`,
     dna: sha1(_dna),
     edition: _edition,
     ...extraMetadata,
@@ -372,24 +372,39 @@ const startCreating = async () => {
           if (background.generate) {
             drawBackground();
           }
-          renderObjectArray.forEach((renderObject, index) => {
-            drawElement(
-              renderObject,
-              index,
-              layerConfigurations[layerConfigIndex].layersOrder.length
-            );
+          let layerPath = results[0].selectedElement.path;
+          let fileExtension = layerPath.split('.').pop();
+
+          if (true) {
+            renderObjectArray.forEach((renderObject, index) => {
+              drawElement(
+                renderObject,
+                index,
+                layerConfigurations[layerConfigIndex].layersOrder.length
+              );
+              if (gif.export) {
+                hashlipsGiffer.add();
+              }
+            });
             if (gif.export) {
-              hashlipsGiffer.add();
+              hashlipsGiffer.stop();
             }
-          });
-          if (gif.export) {
-            hashlipsGiffer.stop();
           }
           debugLogs
             ? console.log('Editions left to create: ', abstractedIndexes)
             : null;
-          saveImage(abstractedIndexes[0]);
-          addMetadata(newDna, abstractedIndexes[0]);
+          if (fileExtension === 'gif') {
+            // This is a bit of a hack to get gifs to work. We have 1/1 gifs, so
+            // if we encounter it, instead of creating a png from the current canvas buffer
+            // we just copy the gif into the appropriate file
+            fs.copyFileSync(
+              layerPath,
+              `${buildDir}/images/${abstractedIndexes[0]}.gif`
+            );
+          } else {
+            saveImage(abstractedIndexes[0]);
+          }
+          addMetadata(newDna, abstractedIndexes[0], fileExtension);
           saveMetaDataSingleFile(abstractedIndexes[0]);
           console.log(
             `Created edition: ${abstractedIndexes[0]}, with DNA: ${sha1(
