@@ -4,7 +4,7 @@ const fs = require('fs');
 
 const namePrefix = 'Jim';
 const description =
-  'A collection of 1024 unique Jims, made with <3 by FingerprintsDAO.';
+  'A collection of 2048 unique Jims, made with <3 by FingerprintsDAO.';
 const baseUri = 'ipfs://NewUriToReplace';
 
 const layerConfigurations = [
@@ -37,7 +37,7 @@ const layerConfigurations = [
     ],
   },
   {
-    growEditionSizeTo: 1024,
+    growEditionSizeTo: 2048,
     layersOrder: [
       {
         name: '0-bg',
@@ -123,7 +123,7 @@ const rarityDelimiter = '#';
 const uniqueDnaTorrance = 10000;
 
 const preview = {
-  thumbPerRow: 20,
+  thumbPerRow: 30,
   thumbWidth: 100,
   imageRatio: format.height / format.width,
   imageName: 'preview.png',
