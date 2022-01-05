@@ -6,6 +6,7 @@ const { ethers } = require("hardhat");
 
 const SIGNER = 0;
 const FEE = 5;
+const TOTAL_SUPPLY = 16;
 
 describe("Jims", () => {
   let jims, accounts, signers;
@@ -17,12 +18,12 @@ describe("Jims", () => {
     signers = await ethers.getSigners();
     accounts = signers.map(s => s.address);
 
-    jims = await factory.deploy(accounts[FEE]);
+    jims = await factory.deploy(accounts[FEE], TOTAL_SUPPLY);
     assert.notEqual(jims, undefined, "Jims contract instance is undefined.");
   });
 
   it("Total supply returns correct value", async () => {
-    expect(await jims._totalSupply()).to.equal(2048);
+    expect(await jims._totalSupply()).to.equal(TOTAL_SUPPLY);
   });
 
   it("Total minted returns 0 initially", async () => {
@@ -48,5 +49,15 @@ describe("Jims", () => {
     expect(await jims._totalMinted()).to.equal(totalMinted + 1);
     expect(await jims.priceToMint() > mintPrice);
     expect(await ethers.provider.getBalance(accounts[FEE])).to.equal(feeWalletBalance.add(mintPrice));
+  });
+
+  it("Mint stops after reaching total supply", async () => {
+    const totalSupply = await jims._totalSupply();
+    for (let i = await jims._totalMinted(); i < totalSupply; i++) {
+      await jims.connect(signers[1]).mint({value: await jims.priceToMint()});
+    }
+    expect(await jims._totalMinted()).to.equal(totalSupply);
+
+    await assert.rejects(jims.connect(signers[1]).mint({value: await jims.priceToMint()}), /All JIMs were already minted/);
   });
 });

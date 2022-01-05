@@ -6,13 +6,15 @@ import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 // SPDX-License-Identifier: MIT
 contract Jims is ERC721URIStorage {
   address _feeWallet;
-  uint256 public _totalSupply = 2048;
+  uint256 public _totalSupply;
+
   uint256 public _totalMinted = 0;
   uint256 public _mintPriceLowerBound = 100;
   uint256 public _mintPriceUpperBound = 200;
 
-  constructor(address feeWallet) ERC721("The Jims", "JIM") {
+  constructor(address feeWallet, uint256 totalSupply) ERC721("The Jims", "JIM") {
     _feeWallet = feeWallet;
+    _totalSupply = totalSupply;
   }
 
   function priceToMint() public view returns (uint256) {
