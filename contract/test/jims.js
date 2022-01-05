@@ -30,7 +30,10 @@ describe("Jims", () => {
   });
 
   it("Mint fails if paying less than the mint price", async () => {
+    const mintPrice = await jims.priceToMint();
+
     await assert.rejects(jims.connect(signers[1]).mint({value: 1}), /Must pay at least/);
+    await assert.rejects(jims.connect(signers[1]).mint({value: mintPrice - 1}), /Must pay at least/);
     expect(await jims._totalMinted()).to.equal(0);
   });
 
