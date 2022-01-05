@@ -28,4 +28,20 @@ describe("Jims", () => {
   it("Total minted returns 0 initially", async () => {
     expect(await jims._totalMinted()).to.equal(0);
   });
+
+  it("Mint fails if paying less than the mint price", async () => {
+    await assert.rejects(jims.connect(signers[1]).mint({value: 1}), /Must pay at least/);
+    expect(await jims._totalMinted()).to.equal(0);
+  });
+
+  it("Mint works if paying more than the mint price", async () => {
+    const mintPrice = await jims.priceToMint();
+    const totalMinted = await jims._totalMinted();
+
+    await jims.connect(signers[1]).mint({value: mintPrice});
+
+    expect(await jims.ownerOf(totalMinted)).to.equal(signers[1].address);
+    expect(await jims._totalMinted()).to.equal(totalMinted + 1);
+    expect(await jims.priceToMint() > mintPrice);
+  });
 });
