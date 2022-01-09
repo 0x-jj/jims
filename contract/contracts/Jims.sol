@@ -152,59 +152,70 @@ contract Jims is ERC721Enumerable, Ownable {
   }
 
   function mintSpecial(address recipient) external onlyOwner {
-        require(!devMintLocked, "Dev Mint Permanently Locked");
-        for (uint256 i = 0; i < 10; i++) {
-            _safeMint(recipient, totalSupply() + 1);
-        }
-        devMintLocked = true;
+    require(!devMintLocked, "Dev Mint Permanently Locked");
+    for (uint256 i = 0; i < 10; i++) {
+        _safeMint(recipient, totalSupply() + 1);
     }
+    devMintLocked = true;
+  }
 
   function _whitelistToadzBuilders() private {
+    _whitelistedAddresses[0x38cb169b538a9Ad32a8B146D534b8087A7fa9033] = true;
+    _whitelistedAddresses[0xe151dF2b98F9CE246C1De62f10F08c75991F6f6d] = true;
+    _whitelistedAddresses[0x0deE629A5961F0493A54283B88Fc0Da49558E27c] = true;
+    _whitelistedAddresses[0x515278483D7888B877F605984bF7fF0f489D6b88] = true;
+    _whitelistedAddresses[0x7651f150fDF8E9C6293FaF3DBFE469296397f216] = true;
+    _whitelistedAddresses[0x829B325036EE8F6B6ec80311d2699505505696eF] = true;
+    _whitelistedAddresses[0x31C1b03EC94EC958DD6E53351f1760f8FF72946B] = true;
+    _whitelistedAddresses[0x5ba89cAd1B7925083FdC91F8aFc5dff954df803F] = true;
+    _whitelistedAddresses[0xDE8f5F0b94134d50ad7f85EF02b9771203F939E5] = true;
+    _whitelistedAddresses[0x27E46E5C28d29Cae26fC0a92ACfCb3C9718D8Ee0] = true;
+    _whitelistedAddresses[0x51e13ff041D86dcc4B8126eD58050b7C2BA2c5B0] = true;
+    _whitelistedAddresses[0xb4005DB54aDecf669BaBC3efb19B9B7E3978ebc2] = true;
+    _whitelistedAddresses[0xce4122fEC66C21b0114a8Ef6dA8BCC44C396Cb66] = true;
+    _whitelistedAddresses[0x1E4aB43d5D283cb3bf809a46C4eed47C7283e6EC] = true;
+    _whitelistedAddresses[0xAd1B4d6d80Aea57c966D9751A5Fe2c60a0469F60] = true;
+    _whitelistedAddresses[0xDe05523952B159f1E07f61E744a5e451776B2890] = true;
+    _whitelistedAddresses[0x9C3b82bf3464e3Eb594d7F172800066C0394D996] = true;
+    _whitelistedAddresses[0xCF4e26a7e7eAe4b3840dd31C527096e1265AB990] = true;
+    _whitelistedAddresses[0xe1385eA3cD4AEB508b2B8094F822960D0C968505] = true;
+    _whitelistedAddresses[0xcB06bEDe7cB0a4b333581B6BdcD05f7cc737b9cC] = true;
+    _whitelistedAddresses[0x04fe82a2a3284F629Bb501e78e6DDf38702d129c] = true;
+    _whitelistedAddresses[0xe0110C6EE2138Ecf9962a6f9f6Ad329cDFE1FA17] = true;
+    _whitelistedAddresses[0x3993996B09949BBA655d98C02c87EA6ABf553630] = true;
     _whitelistedAddresses[0xD19BF5F0B785c6f1F6228C72A8A31C9f383a49c4] = true;
+    _whitelistedAddresses[0x53aD02394eB71543D4deB7c034893A12e15fF4e0] = true;
+    _whitelistedAddresses[0xF3A45Ee798fc560CE080d143D12312185f84aa72] = true;
+    _whitelistedAddresses[0x5b8589befa1bAeaB1f10FF0933DC93c54F906A53] = true;
+    _whitelistedAddresses[0x062062Ed41002Ed2Bff56df561496cbE7FB374ae] = true;
+    _whitelistedAddresses[0xbC9C6379C7C5b87f32cB707711FbEbB2511f0BA1] = true;
+    _whitelistedAddresses[0xb75F87261a1FAC3a86f8A48d55597A622BA3CC48] = true;
+    _whitelistedAddresses[0x6b2AF62E0Bb72761241F35d6796b64B98Fe1Bd1C] = true;
+    _whitelistedAddresses[0x9A15235379CF1111EA102850d442b743BF586FC5] = true;
+    _whitelistedAddresses[0x52A7991d52d8e68de46DFe3CD7d4f48edDa7aE77] = true;
+    _whitelistedAddresses[0x3b359252E4A9B352a127aDdbcc2547460AA4e51c] = true;
+    _whitelistedAddresses[0xedcB20e324E75553C9C7E7578eFAe48AaB4702FF] = true;
     _whitelistedAddresses[0x7132C9f36abE62EAb74CdfDd08C154c9AE45691B] = true;
     _whitelistedAddresses[0x51200AA490F8DF9EBdC9671cF8C8F8A12c089fDa] = true;
-    _whitelistedAddresses[0x6b2AF62E0Bb72761241F35d6796b64B98Fe1Bd1C] = true;
-    _whitelistedAddresses[0xDE8f5F0b94134d50ad7f85EF02b9771203F939E5] = true;
-
-    _whitelistedAddresses[0xDe05523952B159f1E07f61E744a5e451776B2890] = true;
+    _whitelistedAddresses[0xCEB6798d609F86E156F36735EB39108aF6d9a8cB] = true;
+    _whitelistedAddresses[0xe360776eDA4764CDEe0b7613857f286b861aB4D4] = true;
     _whitelistedAddresses[0x484eC62385e780f2460fEaC34864A77bA5A18134] = true;
     _whitelistedAddresses[0x202e1B414D601395c30A6F70EFfA082f36Ea8f79] = true;
     _whitelistedAddresses[0xf8c75C5E9ec6875c57C0Dbc30b59934B37908c4e] = true;
-    _whitelistedAddresses[0xCF4e26a7e7eAe4b3840dd31C527096e1265AB990] = true;
-
-    _whitelistedAddresses[0xe151dF2b98F9CE246C1De62f10F08c75991F6f6d] = true;
-    _whitelistedAddresses[0x805f017fd3E5F427bA7510f10CE0BE2e0d6e277A] = true;
     _whitelistedAddresses[0x3491A2C7Aa4D12D67A5ab628185CE07821B9C553] = true;
     _whitelistedAddresses[0xa596370bC21DeE36872B98009dfbbF465DBFefA3] = true;
-    _whitelistedAddresses[0x515278483D7888B877F605984bF7fF0f489D6b88] = true;
-
     _whitelistedAddresses[0xdFba1C121d57d317467dCf6eba3df7b32C5C736f] = true;
-    _whitelistedAddresses[0x77595DA2902B7B6eC37Aee731B75abb1D2861Ea3] = true;
     _whitelistedAddresses[0x389D3C071687A92F060995327Acb015e936A27CE] = true;
-    _whitelistedAddresses[0xbC9C6379C7C5b87f32cB707711FbEbB2511f0BA1] = true;
     _whitelistedAddresses[0x04D42dEd30A02986Dd5E17d39dd34fBA381FcC4E] = true;
-
     _whitelistedAddresses[0xcD494a22fCF4888976c145F9e389869C4ec313aA] = true;
     _whitelistedAddresses[0xff91128081043dcEB6C0bD3f752Fa447fbaA9335] = true;
-    _whitelistedAddresses[0x52A7991d52d8e68de46DFe3CD7d4f48edDa7aE77] = true;
-    _whitelistedAddresses[0xDB708B93932F328356587510B57CfFC43C19EdA0] = true;
-    _whitelistedAddresses[0x43B3939483f0694544DF0a6288918d51e18BD435] = true;
-
     _whitelistedAddresses[0x06151656d748990d77e20a2d47C4F9369AA74645] = true;
-    _whitelistedAddresses[0x31C1b03EC94EC958DD6E53351f1760f8FF72946B] = true;
     _whitelistedAddresses[0x6A9B9563F32Bc418f35067CE47554C894799515b] = true;
     _whitelistedAddresses[0x9C906F90137C764035d180D3983F15E7C2cb8BbE] = true;
-    _whitelistedAddresses[0xF68C82911C7e6c9701aa27ddf9fECDE8A1C0D470] = true;
-
-    _whitelistedAddresses[0x407b3E415234A43c3f8f899514Aa77BF9d940a75] = true;
-    _whitelistedAddresses[0xF3A45Ee798fc560CE080d143D12312185f84aa72] = true;
-    _whitelistedAddresses[0x2C5DCa9915bDd37A6b347c0289C2aE7C2F802a71] = true;
-    _whitelistedAddresses[0xDb94Daa8bF1b6F45B122F442F922a2C4DD2F7aDe] = true;
-    _whitelistedAddresses[0x51661d54E0b6653446c602fd4d973D5205F22Dc3] = true;
-
     _whitelistedAddresses[0x8Bd8795CbeED15F8D5074f493C53b39C11Ed37B2] = true;
     _whitelistedAddresses[0x93e9594A8f2b5671aeE54b86283FA5A7261F93d7] = true;
     _whitelistedAddresses[0xc6B89634f0afb34b59c05A0B7cD132141778aDDd] = true;
+    _whitelistedAddresses[0x51661d54E0b6653446c602fd4d973D5205F22Dc3] = true;
   }
 
   function _baseURI() internal view virtual override returns (string memory) {
