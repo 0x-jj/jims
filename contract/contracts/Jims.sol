@@ -17,13 +17,13 @@ contract Jims is ERC721Enumerable, Ownable {
   address public _feeWallet;
   uint256 public _totalSupply;
   uint256 public _preMintSupply;
+  uint256 public _preMintStartTime;
   mapping (address => bool) public _whitelistedAddresses;
   mapping (address => bool) public _preMintedAddresses;
 
   uint256 public _totalMinted = 0;
   uint256 public _totalPreMinted = 0;
-  uint256 public _priceToPreMint = 0.069 ether;
-  uint256 public _priceToMint = 0.169 ether;
+  uint256 public _priceToMint = 0.069 ether;
   bool public _mintAllowed = false;
 
   constructor(address feeWallet, uint256 preMintSupply, uint256 totalSupply) ERC721("The Jims", "JIM") {
@@ -40,7 +40,14 @@ contract Jims is ERC721Enumerable, Ownable {
 
   function allowMinting() public onlyOwner {
     _mintAllowed = true;
+    _preMintStartTime = block.timestamp;
   }
+
+  function publicSaleStarted() public view returns (bool) {
+    return _mintAllowed && _preMintStartTime > 0 &&
+      (_totalPreMinted >= _preMintSupply || block.timestamp - 1 hours > _preMintStartTime);
+  }
+
 
   function whitelistAddress(address wallet) public onlyOwner {
     require(_whitelistedAddresses[wallet] == false, "Address already whitelisted");
@@ -50,13 +57,11 @@ contract Jims is ERC721Enumerable, Ownable {
   function mint() payable external {
     require(_mintAllowed, "Mint is not allowed yet");
     require(_totalMinted < _totalSupply, "All JIMs were already minted");
+    require(msg.value >= _priceToMint, "Must pay at least the price to mint");
 
     if (canPreMint(msg.sender)) {
-      require(msg.value >= _priceToPreMint, "Must pay at least the price to pre-mint");
       _totalPreMinted += 1;
       _preMintedAddresses[msg.sender] = true;
-    } else {
-      require(msg.value >= _priceToMint, "Must pay at least the price to mint");
     }
 
     (bool feeSent, ) = _feeWallet.call{value: msg.value}("");
@@ -72,10 +77,6 @@ contract Jims is ERC721Enumerable, Ownable {
       ret[i] = tokenOfOwnerByIndex(wallet, i);
     }
     return ret;
-  }
-
-  function priceToMint(address wallet) public view returns (uint256) {
-    return canPreMint(wallet) ? _priceToPreMint : _priceToMint;
   }
 
   function canPreMint(address wallet) public view returns (bool) {
