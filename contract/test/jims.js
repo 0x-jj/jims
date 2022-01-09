@@ -130,12 +130,12 @@ describe("Jims", () => {
     const mintPrice = await jims.priceToMint();
     await assert.rejects(jims.connect(signers[1]).mint({value: mintPrice}), /Public sale/);
 
-    await ethers.provider.send("evm_increaseTime", [30 * 60])
+    await ethers.provider.send("evm_increaseTime", [15 * 60])
     await ethers.provider.send("evm_mine")
 
     await assert.rejects(jims.connect(signers[1]).mint({value: mintPrice}), /Public sale/);
 
-    await ethers.provider.send("evm_increaseTime", [30 * 60])
+    await ethers.provider.send("evm_increaseTime", [15 * 60])
     await ethers.provider.send("evm_mine")
 
     // Mint works

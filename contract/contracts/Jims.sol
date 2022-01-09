@@ -61,7 +61,7 @@ contract Jims is ERC721Enumerable, Ownable {
 
   function publicSaleStarted() public view returns (bool) {
     return mintAllowed && preMintStartTime > 0 &&
-      (totalPreMinted >= preMintSupply || block.timestamp - 1 hours > preMintStartTime);
+      (totalPreMinted >= preMintSupply || block.timestamp - 30 minutes > preMintStartTime);
   }
 
   function mint() payable external {
