@@ -15,28 +15,27 @@ contract Jims is ERC721Enumerable, Ownable {
   mapping (address => uint256) public _erc721MinBals;
 
   address public _feeWallet;
-  uint256 public _totalSupply;
-  uint256 public _preMintSupply;
-  uint256 public _preMintStartTime;
+  uint256 public maxSupply;
+  uint256 public preMintSupply;
+  uint256 public preMintStartTime;
   mapping (address => bool) public _whitelistedAddresses;
   mapping (address => bool) public _preMintedAddresses;
 
-  uint256 public _totalMinted = 0;
   uint256 public _totalPreMinted = 0;
-  uint256 public _priceToMint = 0.069 ether;
-  bool public _mintAllowed = false;
+  uint256 public priceToMint = 0.069 ether;
+  bool public mintAllowed = false;
 
-  constructor(address feeWallet, uint256 preMintSupply, uint256 totalSupply) ERC721("The Jims", "JIM") {
-    require(preMintSupply <= totalSupply, "preMintSupply must <= totalSupply");
+  constructor(address feeWallet, uint256 preMintSupply_, uint256 maxSupply_) ERC721("The Jims", "JIM") {
+    require(preMintSupply_ <= maxSupply_, "preMintSupply must <= maxSupply");
     _feeWallet = feeWallet;
-    _totalSupply = totalSupply;
-    _preMintSupply = preMintSupply;
+    maxSupply = maxSupply_;
+    preMintSupply = preMintSupply_;
     _whitelistToadzBuilders();
   }
 
   function allowMinting() public onlyOwner {
-    _mintAllowed = true;
-    _preMintStartTime = block.timestamp;
+    mintAllowed = true;
+    preMintStartTime = block.timestamp;
   }
 
   function whitelistERC721(address erc721, uint256 minBalance) public onlyOwner {
@@ -45,9 +44,10 @@ contract Jims is ERC721Enumerable, Ownable {
     _erc721MinBals[erc721] = minBalance;
   }
 
-  function publicSaleStarted() public view returns (bool) {
-    return _mintAllowed && _preMintStartTime > 0 &&
-      (_totalPreMinted >= _preMintSupply || block.timestamp - 1 hours > _preMintStartTime);
+  function whitelistERC20(address erc20, uint256 minBalance) public onlyOwner {
+    require(minBalance > 0, "minBalance must be > 0");
+    _whitelistedERC20s.push(erc20);
+    _erc20MinBals[erc20] = minBalance;
   }
 
   function whitelistAddress(address wallet) public onlyOwner {
@@ -55,10 +55,19 @@ contract Jims is ERC721Enumerable, Ownable {
     _whitelistedAddresses[wallet] = true;
   }
 
+  function totalMinted() public view returns (uint256) {
+    return totalSupply();
+  }
+
+  function publicSaleStarted() public view returns (bool) {
+    return mintAllowed && preMintStartTime > 0 &&
+      (_totalPreMinted >= preMintSupply || block.timestamp - 1 hours > preMintStartTime);
+  }
+
   function mint() payable external {
-    require(_mintAllowed, "Mint is not allowed yet");
-    require(_totalMinted < _totalSupply, "All JIMs were already minted");
-    require(msg.value >= _priceToMint, "Must pay at least the price to mint");
+    require(mintAllowed, "Mint is not allowed yet");
+    require(totalSupply() < maxSupply, "All JIMs were already minted");
+    require(msg.value >= priceToMint, "Must pay at least the price to mint");
 
     if (canPreMint(msg.sender)) {
       _totalPreMinted += 1;
@@ -70,8 +79,7 @@ contract Jims is ERC721Enumerable, Ownable {
     (bool feeSent, ) = _feeWallet.call{value: msg.value}("");
     require(feeSent, "Transfer to fee wallet failed");
 
-    _totalMinted += 1;
-    _safeMint(msg.sender, _totalMinted);
+    _safeMint(msg.sender, totalSupply() + 1);
   }
 
   function allOwned(address wallet) public view returns (uint256[] memory) {
@@ -83,7 +91,7 @@ contract Jims is ERC721Enumerable, Ownable {
   }
 
   function canPreMint(address wallet) public view returns (bool) {
-    return isPreMinter(wallet) && _preMintedAddresses[wallet] == false && _totalPreMinted < _preMintSupply;
+    return isPreMinter(wallet) && _preMintedAddresses[wallet] == false && _totalPreMinted < preMintSupply;
   }
 
   function isPreMinter(address wallet) public view returns (bool) {
