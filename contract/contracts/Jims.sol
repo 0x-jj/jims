@@ -26,6 +26,8 @@ contract Jims is ERC721Enumerable, Ownable {
   uint256 public totalPreMinted = 0;
   uint256 public priceToMint = 0.069 ether;
   bool public mintAllowed = false;
+  bool public devMintLocked = false;
+  string public baseURI = "ipfs://QmcnnBXi99renVhnr3wX14TEj3k2EiGHFnn1gQGJhZBmeX/";
 
   constructor(address feeWallet, uint256 preMintSupply_, uint256 maxSupply_, uint256 maxMintPerTransaction_) ERC721("The Jims", "JIM") {
     require(preMintSupply_ <= maxSupply_, "preMintSupply must <= maxSupply");
@@ -71,11 +73,7 @@ contract Jims is ERC721Enumerable, Ownable {
       (totalPreMinted >= preMintSupply || block.timestamp - 30 minutes > preMintStartTime);
   }
 
-  function mint() payable public {
-    batchMint(1);
-  }
-
-  function batchMint(uint256 n) payable public {
+  function mint(uint256 n) payable public {
     require(mintAllowed, "Mint is not allowed yet");
     require(n <= maxMintPerTransaction, "There is a limit on minting too many at a time!");
     require(totalSupply() + n <= maxSupply, "Not enough Jims left to mint");
@@ -129,6 +127,14 @@ contract Jims is ERC721Enumerable, Ownable {
     return _whitelistedAddresses[wallet];
   }
 
+  function mintSpecial(address recipient) external onlyOwner {
+        require(!devMintLocked, "Dev Mint Permanently Locked");
+        for (uint256 i = 0; i < 10; i++) {
+            _safeMint(recipient, totalSupply() + 1);
+        }
+        devMintLocked = true;
+    }
+
   function _whitelistToadzBuilders() private {
     _whitelistedAddresses[0xD19BF5F0B785c6f1F6228C72A8A31C9f383a49c4] = true;
     _whitelistedAddresses[0x7132C9f36abE62EAb74CdfDd08C154c9AE45691B] = true;
@@ -178,8 +184,13 @@ contract Jims is ERC721Enumerable, Ownable {
   }
 
   function _baseURI() internal view virtual override returns (string memory) {
-      return "ipfs://QmcnnBXi99renVhnr3wX14TEj3k2EiGHFnn1gQGJhZBmeX/";
+      return baseURI;
   }
+
+  function _setBaseURI(string memory baseURI_) external onlyOwner {
+      baseURI = baseURI_;
+  }
+
 }
 
 

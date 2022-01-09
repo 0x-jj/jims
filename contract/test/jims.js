@@ -37,8 +37,16 @@ describe("Jims", () => {
   });
 
   it("Cannot mint before minting is allowed", async () => {
-    const jims = await factory.deploy(accounts[FEE], PREMINT_SUPPLY, TOTAL_SUPPLY, MAX_MINT_PER_TX);
-    await assert.rejects(jims.connect(signers[1]).mint({value: 1}), /Mint is not allowed/);
+    const jims = await factory.deploy(
+      accounts[FEE],
+      PREMINT_SUPPLY,
+      TOTAL_SUPPLY,
+      MAX_MINT_PER_TX
+    );
+    await assert.rejects(
+      jims.connect(signers[1]).mint(1, { value: 1 }),
+      /Mint is not allowed/
+    );
   });
 
   it("Max supply returns correct value", async () => {
@@ -55,15 +63,24 @@ describe("Jims", () => {
     const jims = await deploy();
     const mintPrice = await jims.priceToMint();
 
-    await assert.rejects(jims.connect(signers[1]).mint({value: 1}), /Not enough ether/);
-    await assert.rejects(jims.connect(signers[1]).mint({value: mintPrice.sub(1)}), /Not enough ether/);
+    await assert.rejects(
+      jims.connect(signers[1]).mint(1, { value: 1 }),
+      /Not enough ether/
+    );
+    await assert.rejects(
+      jims.connect(signers[1]).mint(1, { value: mintPrice.sub(1) }),
+      /Not enough ether/
+    );
     expect(await jims.totalMinted()).to.equal(0);
   });
 
   it("Premint fails if user not whitelisted", async () => {
     const jims = await deploy();
     const mintPrice = await jims.priceToMint();
-    await assert.rejects(jims.connect(signers[1]).mint({value: mintPrice}), /Public sale/);
+    await assert.rejects(
+      jims.connect(signers[1]).mint(1, { value: mintPrice }),
+      /Public sale/
+    );
   });
 
   it("Premint works with erc721 if paying more than the mint price and returns the correct tokenURI", async () => {
@@ -75,21 +92,31 @@ describe("Jims", () => {
     const mintPrice = await jims.priceToMint();
     const prevTotalMinted = await jims.totalMinted();
 
-    await assert.rejects(jims.connect(signers[1]).mint({value: mintPrice}), /Public sale/);
+    await assert.rejects(
+      jims.connect(signers[1]).mint(1, { value: mintPrice }),
+      /Public sale/
+    );
 
     await autoglyphs.createNft(accounts[1]);
 
-    await jims.connect(signers[1]).mint({value: mintPrice});
+    await jims.connect(signers[1]).mint(1, { value: mintPrice });
 
     const totalMinted = await jims.totalMinted();
 
     expect(await jims.ownerOf(totalMinted)).to.equal(signers[1].address);
-    expect(await jims.tokenURI(totalMinted)).to.equal(`ipfs://QmcnnBXi99renVhnr3wX14TEj3k2EiGHFnn1gQGJhZBmeX/${totalMinted}`)
+    expect(await jims.tokenURI(totalMinted)).to.equal(
+      `ipfs://QmcnnBXi99renVhnr3wX14TEj3k2EiGHFnn1gQGJhZBmeX/${totalMinted}`
+    );
     expect(totalMinted).to.equal(prevTotalMinted + 1);
-    expect(await jims.priceToMint() > mintPrice);
-    expect(await ethers.provider.getBalance(accounts[FEE])).to.equal(feeWalletBalance.add(mintPrice));
+    expect((await jims.priceToMint()) > mintPrice);
+    expect(await ethers.provider.getBalance(accounts[FEE])).to.equal(
+      feeWalletBalance.add(mintPrice)
+    );
 
-    await assert.rejects(jims.connect(signers[1]).mint({value: mintPrice}), /Public sale/);
+    await assert.rejects(
+      jims.connect(signers[1]).mint(1, { value: mintPrice }),
+      /Public sale/
+    );
   });
 
   it("Premint works with erc20", async () => {
@@ -98,16 +125,22 @@ describe("Jims", () => {
     await jims.connect(signers[0]).whitelistERC20(prints.address, 1000);
 
     const mintPrice = await jims.priceToMint();
-    await assert.rejects(jims.connect(signers[1]).mint({value: mintPrice}), /Public sale/);
+    await assert.rejects(
+      jims.connect(signers[1]).mint(1, { value: mintPrice }),
+      /Public sale/
+    );
 
     await prints.mint(accounts[1], 500);
-    await assert.rejects(jims.connect(signers[1]).mint({value: mintPrice}), /Public sale/);
+    await assert.rejects(
+      jims.connect(signers[1]).mint(1, { value: mintPrice }),
+      /Public sale/
+    );
 
     await prints.mint(accounts[1], 500);
 
     // Premint should work
     expect(await jims.balanceOf(accounts[1])).to.equal(0);
-    await jims.connect(signers[1]).mint({value: mintPrice});
+    await jims.connect(signers[1]).mint(1, { value: mintPrice });
     expect(await jims.balanceOf(accounts[1])).to.equal(1);
     expect(await jims.ownerOf(await jims.totalMinted())).to.equal(accounts[1]);
   });
@@ -115,13 +148,16 @@ describe("Jims", () => {
   it("Premint works with whitelisted address", async () => {
     const jims = await deploy();
     const mintPrice = await jims.priceToMint();
-    await assert.rejects(jims.connect(signers[1]).mint({value: mintPrice}), /Public sale/);
+    await assert.rejects(
+      jims.connect(signers[1]).mint(1, { value: mintPrice }),
+      /Public sale/
+    );
 
     await jims.connect(signers[0]).whitelistAddress(accounts[1]);
 
     // Premint works
     expect(await jims.balanceOf(accounts[1])).to.equal(0);
-    await jims.connect(signers[1]).mint({value: mintPrice});
+    await jims.connect(signers[1]).mint(1, { value: mintPrice });
     expect(await jims.balanceOf(accounts[1])).to.equal(1);
     expect(await jims.ownerOf(await jims.totalMinted())).to.equal(accounts[1]);
   });
@@ -129,19 +165,25 @@ describe("Jims", () => {
   it("Mint works after 1 hour", async () => {
     const jims = await deploy();
     const mintPrice = await jims.priceToMint();
-    await assert.rejects(jims.connect(signers[1]).mint({value: mintPrice}), /Public sale/);
+    await assert.rejects(
+      jims.connect(signers[1]).mint(1, { value: mintPrice }),
+      /Public sale/
+    );
 
-    await ethers.provider.send("evm_increaseTime", [15 * 60])
-    await ethers.provider.send("evm_mine")
+    await ethers.provider.send("evm_increaseTime", [15 * 60]);
+    await ethers.provider.send("evm_mine");
 
-    await assert.rejects(jims.connect(signers[1]).mint({value: mintPrice}), /Public sale/);
+    await assert.rejects(
+      jims.connect(signers[1]).mint(1, { value: mintPrice }),
+      /Public sale/
+    );
 
-    await ethers.provider.send("evm_increaseTime", [15 * 60])
-    await ethers.provider.send("evm_mine")
+    await ethers.provider.send("evm_increaseTime", [15 * 60]);
+    await ethers.provider.send("evm_mine");
 
     // Mint works
     expect(await jims.balanceOf(accounts[1])).to.equal(0);
-    await jims.connect(signers[1]).mint({value: mintPrice});
+    await jims.connect(signers[1]).mint(1, { value: mintPrice });
     expect(await jims.balanceOf(accounts[1])).to.equal(1);
     expect(await jims.ownerOf(await jims.totalMinted())).to.equal(accounts[1]);
   });
@@ -163,9 +205,9 @@ describe("Jims", () => {
     expect(await jims.publicSaleStarted()).to.equal(false);
 
     // Premint the entire pre-mint supply
-    await jims.connect(signers[1]).mint({value: price});
+    await jims.connect(signers[1]).mint(1, { value: price });
     expect(await jims.wasPreMinted(await jims.totalMinted())).to.equal(true);
-    await jims.connect(signers[2]).mint({value: price});
+    await jims.connect(signers[2]).mint(1, { value: price });
     expect(await jims.wasPreMinted(await jims.totalMinted())).to.equal(true);
 
     expect(await jims.totalMinted()).to.equal(2);
@@ -176,12 +218,17 @@ describe("Jims", () => {
     // Mint the rest of the supply
     const maxSupply = (await jims.maxSupply()).toNumber();
     for (let i = (await jims.totalMinted()).toNumber(); i < maxSupply; i++) {
-      await jims.connect(signers[3]).mint({value: await jims.priceToMint()});
+      await jims
+        .connect(signers[3])
+        .mint(1, { value: await jims.priceToMint() });
     }
     expect(await jims.totalMinted()).to.equal(maxSupply);
     expect(await jims.totalPreMinted()).to.equal(preMintSupply);
 
-    await assert.rejects(jims.connect(signers[1]).mint({value: await jims.priceToMint()}), /Not enough Jims left/);
+    await assert.rejects(
+      jims.connect(signers[1]).mint(1, { value: await jims.priceToMint() }),
+      /Not enough Jims left/
+    );
   });
 
   it("Batch mint works", async () => {
@@ -192,20 +239,62 @@ describe("Jims", () => {
 
     await autoglyphs.createNft(accounts[1]);
 
-    await assert.rejects(jims.connect(signers[1]).batchMint(5, {value: price.mul(4)}), /Not enough ether/);
-    await assert.rejects(jims.connect(signers[1]).batchMint(5, {value: price.mul(5)}), /Public sale/);
+    await assert.rejects(
+      jims.connect(signers[1]).mint(5, { value: price.mul(4) }),
+      /Not enough ether/
+    );
+    await assert.rejects(
+      jims.connect(signers[1]).mint(5, { value: price.mul(5) }),
+      /Public sale/
+    );
 
-    await ethers.provider.send("evm_increaseTime", [30 * 60])
-    await ethers.provider.send("evm_mine")
+    await ethers.provider.send("evm_increaseTime", [30 * 60]);
+    await ethers.provider.send("evm_mine");
 
-    await assert.rejects(jims.connect(signers[1]).batchMint(10, {value: price.mul(10)}), /There is a limit/);
+    await assert.rejects(
+      jims.connect(signers[1]).mint(10, { value: price.mul(10) }),
+      /There is a limit/
+    );
 
     expect((await jims.allOwned(accounts[1])).length).to.equal(0);
-    await jims.connect(signers[1]).batchMint(5, {value: price.mul(5)});
+    await jims.connect(signers[1]).mint(5, { value: price.mul(5) });
     const allOwned = await jims.allOwned(accounts[1]);
     expect(allOwned.length).to.equal(5);
-    await Promise.all(allOwned.map(async j =>
-      expect(await jims.wasPreMinted(j)).to.equal(false)
-    ));
+    await Promise.all(
+      allOwned.map(async (j) =>
+        expect(await jims.wasPreMinted(j)).to.equal(false)
+      )
+    );
+  });
+
+  it("Dev mint works only once", async () => {
+    const jims = await deploy();
+    await jims.connect(signers[0]).mintSpecial(accounts[1]);
+    expect(await jims.totalMinted()).to.equal(10);
+
+    // now expect it to fail
+    await assert.rejects(
+      jims.connect(signers[0]).mintSpecial(accounts[1]),
+      /Dev Mint Permanently Locked/
+    );
+  });
+
+  it("Can change baseURI", async () => {
+    const jims = await deploy();
+    const initialBaseURI = await jims.baseURI();
+    expect(initialBaseURI).to.equal(
+      "ipfs://QmcnnBXi99renVhnr3wX14TEj3k2EiGHFnn1gQGJhZBmeX/"
+    );
+    await jims._setBaseURI("setToSomethingElse/");
+    const newBaseURI = await jims.baseURI();
+    expect(newBaseURI).to.equal("setToSomethingElse/");
+
+    await ethers.provider.send("evm_increaseTime", [15 * 60 * 2]);
+    await ethers.provider.send("evm_mine");
+
+    const mintPrice = await jims.priceToMint();
+    await jims.connect(signers[1]).mint(1, { value: mintPrice });
+    const tokenURI = await jims.tokenURI(1);
+    expect(tokenURI).to.equal("setToSomethingElse/1");
   });
 });
