@@ -8,12 +8,13 @@ const SIGNER = 0;
 const FEE = 5;
 const PREMINT_SUPPLY = 2;
 const TOTAL_SUPPLY = 16;
+const MAX_MINT_PER_TX = 5;
 
 
 describe("Jims", () => {
   let factory, accounts, signers;
   const deploy = async () => {
-    const jims = await factory.deploy(accounts[FEE], PREMINT_SUPPLY, TOTAL_SUPPLY);
+    const jims = await factory.deploy(accounts[FEE], PREMINT_SUPPLY, TOTAL_SUPPLY, MAX_MINT_PER_TX);
     assert.notEqual(jims, undefined, "Jims contract instance is undefined.");
     await jims.connect(signers[0]).allowMinting();
     return jims;
@@ -36,7 +37,7 @@ describe("Jims", () => {
   });
 
   it("Cannot mint before minting is allowed", async () => {
-    const jims = await factory.deploy(accounts[FEE], PREMINT_SUPPLY, TOTAL_SUPPLY);
+    const jims = await factory.deploy(accounts[FEE], PREMINT_SUPPLY, TOTAL_SUPPLY, MAX_MINT_PER_TX);
     await assert.rejects(jims.connect(signers[1]).mint({value: 1}), /Mint is not allowed/);
   });
 
@@ -194,6 +195,8 @@ describe("Jims", () => {
 
     await ethers.provider.send("evm_increaseTime", [30 * 60])
     await ethers.provider.send("evm_mine")
+
+    await assert.rejects(jims.connect(signers[1]).batchMint(10, {value: price.mul(10)}), /There is a limit/);
 
     expect((await jims.allOwned(accounts[1])).length).to.equal(0);
     await jims.connect(signers[1]).batchMint(5, {value: price.mul(5)});

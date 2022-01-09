@@ -18,6 +18,7 @@ contract Jims is ERC721Enumerable, Ownable {
   uint256 public maxSupply;
   uint256 public preMintSupply;
   uint256 public preMintStartTime;
+  uint256 public maxMintPerTransaction;
   mapping (address => bool) public _whitelistedAddresses;
   mapping (address => bool) public _preMintedAddresses;
   mapping (uint256 => bool) public _preMintedTokenIds;
@@ -26,11 +27,12 @@ contract Jims is ERC721Enumerable, Ownable {
   uint256 public priceToMint = 0.069 ether;
   bool public mintAllowed = false;
 
-  constructor(address feeWallet, uint256 preMintSupply_, uint256 maxSupply_) ERC721("The Jims", "JIM") {
+  constructor(address feeWallet, uint256 preMintSupply_, uint256 maxSupply_, uint256 maxMintPerTransaction_) ERC721("The Jims", "JIM") {
     require(preMintSupply_ <= maxSupply_, "preMintSupply must <= maxSupply");
     _feeWallet = feeWallet;
     maxSupply = maxSupply_;
     preMintSupply = preMintSupply_;
+    maxMintPerTransaction = maxMintPerTransaction_;
     _whitelistToadzBuilders();
   }
 
@@ -70,6 +72,7 @@ contract Jims is ERC721Enumerable, Ownable {
   }
 
   function batchMint(uint256 n) payable public {
+    require(n <= maxMintPerTransaction, "There is a limit on minting too many at a time!");
     require(msg.value >= n * priceToMint, "Must pay the price to mint multiple Jims");
 
     for (uint256 i = 0; i < n; i++) {
