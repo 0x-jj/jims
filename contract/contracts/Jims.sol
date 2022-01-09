@@ -29,12 +29,15 @@ contract Jims is ERC721Enumerable, Ownable {
   bool public devMintLocked = false;
   string public baseURI = "ipfs://QmcnnBXi99renVhnr3wX14TEj3k2EiGHFnn1gQGJhZBmeX/";
 
-  constructor(address feeWallet, uint256 preMintSupply_, uint256 maxSupply_, uint256 maxMintPerTransaction_) ERC721("The Jims", "JIM") {
+  uint256 private _obfuscationOffset;
+
+  constructor(address feeWallet, uint256 preMintSupply_, uint256 maxSupply_, uint256 maxMintPerTransaction_, uint256 obfuscationOffset) ERC721("The Jims", "JIM") {
     require(preMintSupply_ <= maxSupply_, "preMintSupply must <= maxSupply");
     _feeWallet = feeWallet;
     maxSupply = maxSupply_;
     preMintSupply = preMintSupply_;
     maxMintPerTransaction = maxMintPerTransaction_;
+    _obfuscationOffset = obfuscationOffset;
     _whitelistToadzBuilders();
   }
 
@@ -82,7 +85,7 @@ contract Jims is ERC721Enumerable, Ownable {
     if (canPreMint(msg.sender) && n == 1) {
       totalPreMinted += 1;
       _preMintedAddresses[msg.sender] = true;
-      _preMintedTokenIds[totalSupply() + 1] = true;
+      _preMintedTokenIds[_bijectTokenId(totalSupply() + 1)] = true;
     } else {
       require(publicSaleStarted(), "Public sale hasn't started yet");
     }
@@ -91,8 +94,12 @@ contract Jims is ERC721Enumerable, Ownable {
     require(feeSent, "Transfer to fee wallet failed");
 
     for (uint256 i = 0; i < n; i++) {
-      _safeMint(msg.sender, totalSupply() + 1);
+      _safeMint(msg.sender, _bijectTokenId(totalSupply() + 1));
     }
+  }
+
+  function _bijectTokenId(uint256 tokenId) private view returns (uint256) {
+    return (tokenId + _obfuscationOffset) % maxSupply;
   }
 
   function allOwned(address wallet) public view returns (uint256[] memory) {
