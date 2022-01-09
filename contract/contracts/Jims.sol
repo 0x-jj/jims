@@ -14,6 +14,7 @@ contract Jims is ERC721URIStorage, Ownable {
   uint256 public _preMintSupply;
   mapping (address => bool) public _whitelistedAddresses;
   mapping (address => bool) public _preMintedAddresses;
+  mapping (address => uint256[]) public _ownedByAddress;
 
   uint256 public _totalMinted = 0;
   uint256 public _totalPreMinted = 0;
@@ -41,29 +42,33 @@ contract Jims is ERC721URIStorage, Ownable {
   function mint() payable external {
     require(_mintAllowed, "Mint is not allowed yet");
     require(_totalMinted < _totalSupply, "All JIMs were already minted");
-    require(msg.value >= _priceToMint, "Must pay at least the price to mint");
 
-    _mint();
-  }
+    if (canPreMint(msg.sender)) {
+      require(msg.value >= _priceToPreMint, "Must pay at least the price to pre-mint");
+      _totalPreMinted += 1;
+      _preMintedAddresses[msg.sender] = true;
+    } else {
+      require(msg.value >= _priceToMint, "Must pay at least the price to mint");
+    }
 
-  function preMint() payable external {
-    require(isPreMinter(msg.sender), "Address not whitelisted as a pre-minter");
-    require(_preMintedAddresses[msg.sender] == false, "Address already pre-minted");
-    require(_mintAllowed, "Mint is not allowed yet");
-    require(_totalPreMinted < _preMintSupply, "All JIMs were already pre-minted");
-    require(msg.value >= _priceToPreMint, "Must pay at least the price to pre-mint");
-
-    _mint();
-    _totalPreMinted += 1;
-    _preMintedAddresses[msg.sender] = true;
-  }
-
-  function _mint() private {
     (bool feeSent, ) = _feeWallet.call{value: msg.value}("");
     require(feeSent, "Transfer to fee wallet failed");
 
+    _ownedByAddress[msg.sender].push(_totalMinted);
     _safeMint(msg.sender, _totalMinted);
     _totalMinted += 1;
+  }
+
+  function allOwned(address wallet) public view returns (uint256[] memory) {
+    return _ownedByAddress[wallet];
+  }
+
+  function priceToMint(address wallet) public view returns (uint256) {
+    return canPreMint(wallet) ? _priceToPreMint : _priceToMint;
+  }
+
+  function canPreMint(address wallet) public view returns (bool) {
+    return isPreMinter(wallet) && _preMintedAddresses[wallet] == false && _totalPreMinted < _preMintSupply;
   }
 
   function isPreMinter(address wallet) public view returns (bool) {
@@ -75,10 +80,6 @@ contract Jims is ERC721URIStorage, Ownable {
 
     return PRINTS.balanceOf(wallet) >= 1000 || RAW.balanceOf(wallet) >= 500 || NOUNS.balanceOf(wallet) >= 1 ||
       AVID_LINES.balanceOf(wallet) >= 1 || AUTO_GLYPHS.balanceOf(wallet) >= 1 || _whitelistedAddresses[wallet];
-  }
-
-  function canPreMint(address wallet) public view returns (bool) {
-    return isPreMinter(wallet) && _preMintedAddresses[wallet] == false;
   }
 
   function _whitelistToadzBuilders() private {
