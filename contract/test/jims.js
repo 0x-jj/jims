@@ -96,11 +96,16 @@ describe("Jims", () => {
     await autoglyphs.createNft(accounts[1]);
     await autoglyphs.createNft(accounts[2]);
 
+    expect(await jims.totalMinted()).to.equal(0);
+    expect(await jims.totalPreMinted()).to.equal(0);
     expect(await jims.publicSaleStarted()).to.equal(false);
 
     // Premint the entire pre-mint supply
     await jims.connect(signers[1]).mint({value: price});
     await jims.connect(signers[2]).mint({value: price});
+
+    expect(await jims.totalMinted()).to.equal(2);
+    expect(await jims.totalPreMinted()).to.equal(2);
 
     expect(await jims.publicSaleStarted()).to.equal(true);
 
@@ -110,6 +115,7 @@ describe("Jims", () => {
       await jims.connect(signers[3]).mint({value: await jims.priceToMint()});
     }
     expect(await jims.totalMinted()).to.equal(maxSupply);
+    expect(await jims.totalPreMinted()).to.equal(preMintSupply);
 
     await assert.rejects(jims.connect(signers[1]).mint({value: await jims.priceToMint()}), /All JIMs were already minted/);
   });

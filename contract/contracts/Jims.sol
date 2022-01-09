@@ -21,7 +21,7 @@ contract Jims is ERC721Enumerable, Ownable {
   mapping (address => bool) public _whitelistedAddresses;
   mapping (address => bool) public _preMintedAddresses;
 
-  uint256 public _totalPreMinted = 0;
+  uint256 public totalPreMinted = 0;
   uint256 public priceToMint = 0.069 ether;
   bool public mintAllowed = false;
 
@@ -61,7 +61,7 @@ contract Jims is ERC721Enumerable, Ownable {
 
   function publicSaleStarted() public view returns (bool) {
     return mintAllowed && preMintStartTime > 0 &&
-      (_totalPreMinted >= preMintSupply || block.timestamp - 1 hours > preMintStartTime);
+      (totalPreMinted >= preMintSupply || block.timestamp - 1 hours > preMintStartTime);
   }
 
   function mint() payable external {
@@ -70,7 +70,7 @@ contract Jims is ERC721Enumerable, Ownable {
     require(msg.value >= priceToMint, "Must pay at least the price to mint");
 
     if (canPreMint(msg.sender)) {
-      _totalPreMinted += 1;
+      totalPreMinted += 1;
       _preMintedAddresses[msg.sender] = true;
     } else {
       require(publicSaleStarted(), "Public sale hasn't started yet");
@@ -91,7 +91,7 @@ contract Jims is ERC721Enumerable, Ownable {
   }
 
   function canPreMint(address wallet) public view returns (bool) {
-    return isPreMinter(wallet) && _preMintedAddresses[wallet] == false && _totalPreMinted < preMintSupply;
+    return isPreMinter(wallet) && _preMintedAddresses[wallet] == false && totalPreMinted < preMintSupply;
   }
 
   function isPreMinter(address wallet) public view returns (bool) {
