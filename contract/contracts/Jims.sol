@@ -34,20 +34,21 @@ contract Jims is ERC721Enumerable, Ownable {
     _whitelistToadzBuilders();
   }
 
-  function _baseURI() internal view virtual override returns (string memory) {
-      return "ipfs://QmcnnBXi99renVhnr3wX14TEj3k2EiGHFnn1gQGJhZBmeX/";
-  }
-
   function allowMinting() public onlyOwner {
     _mintAllowed = true;
     _preMintStartTime = block.timestamp;
+  }
+
+  function whitelistERC721(address erc721, uint256 minBalance) public onlyOwner {
+    require(minBalance > 0, "minBalance must be > 0");
+    _whitelistedERC721s.push(erc721);
+    _erc721MinBals[erc721] = minBalance;
   }
 
   function publicSaleStarted() public view returns (bool) {
     return _mintAllowed && _preMintStartTime > 0 &&
       (_totalPreMinted >= _preMintSupply || block.timestamp - 1 hours > _preMintStartTime);
   }
-
 
   function whitelistAddress(address wallet) public onlyOwner {
     require(_whitelistedAddresses[wallet] == false, "Address already whitelisted");
@@ -62,6 +63,8 @@ contract Jims is ERC721Enumerable, Ownable {
     if (canPreMint(msg.sender)) {
       _totalPreMinted += 1;
       _preMintedAddresses[msg.sender] = true;
+    } else {
+      require(publicSaleStarted(), "Public sale hasn't started yet");
     }
 
     (bool feeSent, ) = _feeWallet.call{value: msg.value}("");
@@ -149,6 +152,10 @@ contract Jims is ERC721Enumerable, Ownable {
     _whitelistedAddresses[0x8Bd8795CbeED15F8D5074f493C53b39C11Ed37B2] = true;
     _whitelistedAddresses[0x93e9594A8f2b5671aeE54b86283FA5A7261F93d7] = true;
     _whitelistedAddresses[0xc6B89634f0afb34b59c05A0B7cD132141778aDDd] = true;
+  }
+
+  function _baseURI() internal view virtual override returns (string memory) {
+      return "ipfs://QmcnnBXi99renVhnr3wX14TEj3k2EiGHFnn1gQGJhZBmeX/";
   }
 }
 

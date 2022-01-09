@@ -6,7 +6,7 @@ const { ethers } = require("hardhat");
 
 const SIGNER = 0;
 const FEE = 5;
-const PREMINT_SUPPLY = 4;
+const PREMINT_SUPPLY = 2;
 const TOTAL_SUPPLY = 16;
 
 
@@ -18,6 +18,11 @@ describe("Jims", () => {
     await jims.connect(signers[0]).allowMinting();
     return jims;
   };
+
+  const deployAutoglyphs = async () => {
+    const fact = await ethers.getContractFactory('Autoglyphs');
+    return await fact.deploy();
+  }
 
   before(async () => {
     factory = await ethers.getContractFactory('Jims');
@@ -49,8 +54,19 @@ describe("Jims", () => {
     expect(await jims._totalMinted()).to.equal(0);
   });
 
-  it("Mint works if paying more than the mint price", async () => {
+  it("Premint fails if user not whitelisted", async () => {
     const jims = await deploy();
+    const mintPrice = await jims._priceToMint();
+    await assert.rejects(jims.connect(signers[1]).mint({value: mintPrice}), /Public sale/);
+  });
+
+  it("Premint works if paying more than the mint price and returns the correct tokenURI", async () => {
+    const jims = await deploy();
+    const autoglyphs = await deployAutoglyphs();
+    await jims.connect(signers[0]).whitelistERC721(autoglyphs.address, 1);
+
+    await autoglyphs.createNft(accounts[1]);
+
     const feeWalletBalance = await ethers.provider.getBalance(accounts[FEE]);
     const mintPrice = await jims._priceToMint();
     const prevTotalMinted = await jims._totalMinted();
@@ -64,13 +80,34 @@ describe("Jims", () => {
     expect(totalMinted).to.equal(prevTotalMinted + 1);
     expect(await jims._priceToMint() > mintPrice);
     expect(await ethers.provider.getBalance(accounts[FEE])).to.equal(feeWalletBalance.add(mintPrice));
+
+    await assert.rejects(jims.connect(signers[1]).mint({value: mintPrice}), /Public sale/);
   });
 
   it("Mint stops after reaching total supply", async () => {
     const jims = await deploy();
-    const totalSupply = await jims._totalSupply();
-    for (let i = await jims._totalMinted(); i < totalSupply; i++) {
-      await jims.connect(signers[1]).mint({value: await jims._priceToMint()});
+    const autoglyphs = await deployAutoglyphs();
+    await jims.connect(signers[0]).whitelistERC721(autoglyphs.address, 1);
+
+    const preMintSupply = await jims._preMintSupply();
+    const price = await jims._priceToMint();
+    expect(preMintSupply).to.equal(2);
+
+    await autoglyphs.createNft(accounts[1]);
+    await autoglyphs.createNft(accounts[2]);
+
+    expect(await jims.publicSaleStarted()).to.equal(false);
+
+    // Premint the entire pre-mint supply
+    await jims.connect(signers[1]).mint({value: price});
+    await jims.connect(signers[2]).mint({value: price});
+
+    expect(await jims.publicSaleStarted()).to.equal(true);
+
+    // Mint the rest of the supply
+    const totalSupply = (await jims._totalSupply()).toNumber();
+    for (let i = (await jims._totalMinted()).toNumber(); i < totalSupply; i++) {
+      await jims.connect(signers[3]).mint({value: await jims._priceToMint()});
     }
     expect(await jims._totalMinted()).to.equal(totalSupply);
 
