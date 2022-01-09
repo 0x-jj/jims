@@ -180,4 +180,30 @@ describe("Jims", () => {
 
     await assert.rejects(jims.connect(signers[1]).mint({value: await jims.priceToMint()}), /All JIMs were already minted/);
   });
+
+  it("Batch mint works", async () => {
+    const jims = await deploy();
+    const autoglyphs = await deployAutoglyphs();
+    await jims.connect(signers[0]).whitelistERC721(autoglyphs.address, 1);
+    const price = await jims.priceToMint();
+
+    await autoglyphs.createNft(accounts[1]);
+
+    await assert.rejects(jims.connect(signers[1]).batchMint(5, {value: price.mul(4)}), /Must pay the price to mint multiple Jims/);
+    await assert.rejects(jims.connect(signers[1]).batchMint(5, {value: price.mul(5)}), /Public sale/);
+
+    await ethers.provider.send("evm_increaseTime", [30 * 60])
+    await ethers.provider.send("evm_mine")
+
+    expect((await jims.allOwned(accounts[1])).length).to.equal(0);
+    await jims.connect(signers[1]).batchMint(5, {value: price.mul(5)});
+    const allOwned = await jims.allOwned(accounts[1]);
+    expect(allOwned.length).to.equal(5);
+    expect(await jims.wasPreMinted(allOwned[0])).to.equal(true);
+    expect(await jims.wasPreMinted(allOwned[1])).to.equal(false);
+    expect(await jims.wasPreMinted(allOwned[2])).to.equal(false);
+    expect(await jims.wasPreMinted(allOwned[3])).to.equal(false);
+    expect(await jims.wasPreMinted(allOwned[4])).to.equal(false);
+
+  });
 });
