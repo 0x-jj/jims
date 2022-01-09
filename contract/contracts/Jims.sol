@@ -71,34 +71,30 @@ contract Jims is ERC721Enumerable, Ownable {
       (totalPreMinted >= preMintSupply || block.timestamp - 30 minutes > preMintStartTime);
   }
 
-  function batchMint(uint256 n) payable public {
-    require(n <= maxMintPerTransaction, "There is a limit on minting too many at a time!");
-    require(msg.value >= n * priceToMint, "Must pay the price to mint multiple Jims");
-
-    for (uint256 i = 0; i < n; i++) {
-      mint();
-    }
+  function mint() payable public {
+    batchMint(1);
   }
 
-  function mint() payable public {
+  function batchMint(uint256 n) payable public {
     require(mintAllowed, "Mint is not allowed yet");
-    require(totalSupply() < maxSupply, "All JIMs were already minted");
-    require(msg.value >= priceToMint, "Must pay at least the price to mint");
+    require(n <= maxMintPerTransaction, "There is a limit on minting too many at a time!");
+    require(totalSupply() + n <= maxSupply, "Not enough Jims left to mint");
+    require(msg.value >= n * priceToMint, "Not enough ether sent");
 
-    uint256 tokenId = totalSupply() + 1;
-
-    if (canPreMint(msg.sender)) {
+    if (canPreMint(msg.sender) && n == 1) {
       totalPreMinted += 1;
       _preMintedAddresses[msg.sender] = true;
-      _preMintedTokenIds[tokenId] = true;
+      _preMintedTokenIds[totalSupply() + 1] = true;
     } else {
       require(publicSaleStarted(), "Public sale hasn't started yet");
     }
 
-    (bool feeSent, ) = _feeWallet.call{value: priceToMint}("");
+    (bool feeSent, ) = _feeWallet.call{value: msg.value}("");
     require(feeSent, "Transfer to fee wallet failed");
 
-    _safeMint(msg.sender, tokenId);
+    for (uint256 i = 0; i < n; i++) {
+      _safeMint(msg.sender, totalSupply() + 1);
+    }
   }
 
   function allOwned(address wallet) public view returns (uint256[] memory) {

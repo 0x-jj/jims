@@ -55,8 +55,8 @@ describe("Jims", () => {
     const jims = await deploy();
     const mintPrice = await jims.priceToMint();
 
-    await assert.rejects(jims.connect(signers[1]).mint({value: 1}), /Must pay at least/);
-    await assert.rejects(jims.connect(signers[1]).mint({value: mintPrice.sub(1)}), /Must pay at least/);
+    await assert.rejects(jims.connect(signers[1]).mint({value: 1}), /Not enough ether/);
+    await assert.rejects(jims.connect(signers[1]).mint({value: mintPrice.sub(1)}), /Not enough ether/);
     expect(await jims.totalMinted()).to.equal(0);
   });
 
@@ -164,7 +164,9 @@ describe("Jims", () => {
 
     // Premint the entire pre-mint supply
     await jims.connect(signers[1]).mint({value: price});
+    expect(await jims.wasPreMinted(await jims.totalMinted())).to.equal(true);
     await jims.connect(signers[2]).mint({value: price});
+    expect(await jims.wasPreMinted(await jims.totalMinted())).to.equal(true);
 
     expect(await jims.totalMinted()).to.equal(2);
     expect(await jims.totalPreMinted()).to.equal(2);
@@ -179,7 +181,7 @@ describe("Jims", () => {
     expect(await jims.totalMinted()).to.equal(maxSupply);
     expect(await jims.totalPreMinted()).to.equal(preMintSupply);
 
-    await assert.rejects(jims.connect(signers[1]).mint({value: await jims.priceToMint()}), /All JIMs were already minted/);
+    await assert.rejects(jims.connect(signers[1]).mint({value: await jims.priceToMint()}), /Not enough Jims left/);
   });
 
   it("Batch mint works", async () => {
@@ -190,7 +192,7 @@ describe("Jims", () => {
 
     await autoglyphs.createNft(accounts[1]);
 
-    await assert.rejects(jims.connect(signers[1]).batchMint(5, {value: price.mul(4)}), /Must pay the price to mint multiple Jims/);
+    await assert.rejects(jims.connect(signers[1]).batchMint(5, {value: price.mul(4)}), /Not enough ether/);
     await assert.rejects(jims.connect(signers[1]).batchMint(5, {value: price.mul(5)}), /Public sale/);
 
     await ethers.provider.send("evm_increaseTime", [30 * 60])
@@ -202,10 +204,8 @@ describe("Jims", () => {
     await jims.connect(signers[1]).batchMint(5, {value: price.mul(5)});
     const allOwned = await jims.allOwned(accounts[1]);
     expect(allOwned.length).to.equal(5);
-    expect(await jims.wasPreMinted(allOwned[0])).to.equal(true);
-    expect(await jims.wasPreMinted(allOwned[1])).to.equal(false);
-    expect(await jims.wasPreMinted(allOwned[2])).to.equal(false);
-    expect(await jims.wasPreMinted(allOwned[3])).to.equal(false);
-    expect(await jims.wasPreMinted(allOwned[4])).to.equal(false);
+    await Promise.all(allOwned.map(async j =>
+      expect(await jims.wasPreMinted(j)).to.equal(false)
+    ));
   });
 });
