@@ -1,3 +1,11 @@
+const assert = require("assert");
+const { ethers } = require("hardhat");
+
+const FEE = 5;
+const PREMINT_SUPPLY = 512;
+const TOTAL_SUPPLY = 2048;
+const MAX_MINT_PER_TX = 20;
+
 // This is a script for deploying your contracts. You can adapt it to deploy
 // yours, or create new ones.
 async function main() {
@@ -11,15 +19,21 @@ async function main() {
   }
 
   // ethers is avaialble in the global scope
+  const factory = await ethers.getContractFactory("Jims");
   const signers = await ethers.getSigners();
-  const accounts = signers.map(s => s.address);
+  const accounts = signers.map((s) => s.address);
   const deployer = signers[0];
-  console.log("Deploying the contracts with the account:", await deployer.getAddress());
-
-  const etFactory = await ethers.getContractFactory('ClaimableTokens');
-  const et = await etFactory.deploy("Event Tokens", "EVT");
-
-  console.log("Event Tokens address:", et.address);
+  console.log(
+    "Deploying the contracts with the account:",
+    await deployer.getAddress()
+  );
+  const jims = await factory.deploy(
+    accounts[FEE],
+    PREMINT_SUPPLY,
+    TOTAL_SUPPLY,
+    MAX_MINT_PER_TX
+  );
+  assert.notEqual(jims, undefined, "Jims contract instance is undefined.");
 }
 
 main()

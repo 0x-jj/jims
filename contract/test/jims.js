@@ -79,7 +79,7 @@ describe("Jims", () => {
     const mintPrice = await jims.priceToMint();
     await assert.rejects(
       jims.connect(signers[1]).mint(1, { value: mintPrice }),
-      /Public sale/
+      /You are not eligible to pre-mint/
     );
   });
 
@@ -94,7 +94,7 @@ describe("Jims", () => {
 
     await assert.rejects(
       jims.connect(signers[1]).mint(1, { value: mintPrice }),
-      /Public sale/
+      /You are not eligible to pre-mint/
     );
 
     await autoglyphs.createNft(accounts[1]);
@@ -115,7 +115,7 @@ describe("Jims", () => {
 
     await assert.rejects(
       jims.connect(signers[1]).mint(1, { value: mintPrice }),
-      /Public sale/
+      /You are not eligible to pre-mint/
     );
   });
 
@@ -127,13 +127,13 @@ describe("Jims", () => {
     const mintPrice = await jims.priceToMint();
     await assert.rejects(
       jims.connect(signers[1]).mint(1, { value: mintPrice }),
-      /Public sale/
+      /You are not eligible to pre-mint/
     );
 
     await prints.mint(accounts[1], 500);
     await assert.rejects(
       jims.connect(signers[1]).mint(1, { value: mintPrice }),
-      /Public sale/
+      /You are not eligible to pre-mint/
     );
 
     await prints.mint(accounts[1], 500);
@@ -150,7 +150,7 @@ describe("Jims", () => {
     const mintPrice = await jims.priceToMint();
     await assert.rejects(
       jims.connect(signers[1]).mint(1, { value: mintPrice }),
-      /Public sale/
+      /You are not eligible to pre-mint/
     );
 
     await jims.connect(signers[0]).whitelistAddress(accounts[1]);
@@ -167,7 +167,7 @@ describe("Jims", () => {
     const mintPrice = await jims.priceToMint();
     await assert.rejects(
       jims.connect(signers[1]).mint(1, { value: mintPrice }),
-      /Public sale/
+      /You are not eligible to pre-mint/
     );
 
     await ethers.provider.send("evm_increaseTime", [15 * 60]);
@@ -175,7 +175,7 @@ describe("Jims", () => {
 
     await assert.rejects(
       jims.connect(signers[1]).mint(1, { value: mintPrice }),
-      /Public sale/
+      /You are not eligible to pre-mint/
     );
 
     await ethers.provider.send("evm_increaseTime", [15 * 60]);
@@ -245,7 +245,7 @@ describe("Jims", () => {
     );
     await assert.rejects(
       jims.connect(signers[1]).mint(5, { value: price.mul(5) }),
-      /Public sale/
+      /You are not eligible to pre-mint/
     );
 
     await ethers.provider.send("evm_increaseTime", [30 * 60]);

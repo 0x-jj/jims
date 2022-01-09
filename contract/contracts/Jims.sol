@@ -84,7 +84,7 @@ contract Jims is ERC721Enumerable, Ownable {
       _preMintedAddresses[msg.sender] = true;
       _preMintedTokenIds[totalSupply() + 1] = true;
     } else {
-      require(publicSaleStarted(), "Public sale hasn't started yet");
+      require(publicSaleStarted(), "You are not eligible to pre-mint");
     }
 
     (bool feeSent, ) = _feeWallet.call{value: msg.value}("");
