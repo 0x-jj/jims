@@ -207,6 +207,5 @@ describe("Jims", () => {
     expect(await jims.wasPreMinted(allOwned[2])).to.equal(false);
     expect(await jims.wasPreMinted(allOwned[3])).to.equal(false);
     expect(await jims.wasPreMinted(allOwned[4])).to.equal(false);
-
   });
 });
