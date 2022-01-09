@@ -76,6 +76,16 @@ contract Jims is ERC721Enumerable, Ownable {
       (totalPreMinted >= preMintSupply || block.timestamp - 30 minutes > preMintStartTime);
   }
 
+  function timeToPublicSale() public view returns (int256) {
+    if (preMintStartTime == 0) {
+      return -1;
+    }
+    if (block.timestamp >= preMintStartTime + 30 minutes) {
+      return 0;
+    }
+    return int256(preMintStartTime + 30 minutes - block.timestamp);
+  }
+
   function mint(uint256 n) payable public {
     require(mintAllowed, "Mint is not allowed yet");
     require(n <= maxMintPerTransaction, "There is a limit on minting too many at a time!");
@@ -137,7 +147,7 @@ contract Jims is ERC721Enumerable, Ownable {
   function mintSpecial(address recipient) external onlyOwner {
         require(!devMintLocked, "Dev Mint Permanently Locked");
         for (uint256 i = 0; i < 10; i++) {
-            _safeMint(recipient, totalSupply() + 1);
+            _safeMint(recipient, _bijectTokenId(totalSupply() + 1));
         }
         devMintLocked = true;
     }

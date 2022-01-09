@@ -192,10 +192,12 @@ describe("Jims", () => {
     expect(await jims.ownerOf(mintedId)).to.equal(accounts[1]);
   });
 
-  it("Mint stops after reaching total supply", async () => {
+  it("Special mints, pre-mints, and then mints the entire supply", async () => {
     const jims = await deploy();
     const autoglyphs = await deployAutoglyphs();
     await jims.connect(signers[0]).whitelistERC721(autoglyphs.address, 1);
+
+    await jims.connect(signers[0]).mintSpecial(accounts[8]);
 
     const preMintSupply = await jims.preMintSupply();
     const price = await jims.priceToMint();
@@ -204,7 +206,7 @@ describe("Jims", () => {
     await autoglyphs.createNft(accounts[1]);
     await autoglyphs.createNft(accounts[2]);
 
-    expect(await jims.totalMinted()).to.equal(0);
+    expect(await jims.totalMinted()).to.equal(10);
     expect(await jims.totalPreMinted()).to.equal(0);
     expect(await jims.publicSaleStarted()).to.equal(false);
 
@@ -219,7 +221,7 @@ describe("Jims", () => {
     const mintedId2 = (await jims.allOwned(accounts[2]))[0];
 
     expect(await jims.wasPreMinted(mintedId2)).to.equal(true);
-    expect(await jims.totalMinted()).to.equal(2);
+    expect(await jims.totalMinted()).to.equal(12);
     expect(await jims.totalPreMinted()).to.equal(2);
     expect(await jims.publicSaleStarted()).to.equal(true);
 
