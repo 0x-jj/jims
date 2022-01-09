@@ -88,15 +88,16 @@ contract Jims is ERC721Enumerable, Ownable {
   }
 
   function mint(uint256 n) payable public {
+    uint256 mintedSoFar = totalSupply();
     require(mintAllowed, "Mint is not allowed yet");
     require(n <= maxMintPerTransaction, "There is a limit on minting too many at a time!");
-    require(totalSupply() + n <= maxSupply, "Not enough Jims left to mint");
+    require(mintedSoFar + n <= maxSupply, "Not enough Jims left to mint");
     require(msg.value >= n * priceToMint, "Not enough ether sent");
 
     if (canPreMint(msg.sender) && n == 1) {
       totalPreMinted += 1;
       _preMintedAddresses[msg.sender] = true;
-      _preMintedTokenIds[_bijectTokenId(totalSupply() + 1)] = true;
+      _preMintedTokenIds[_bijectTokenId(mintedSoFar + 1)] = true;
     } else {
       require(publicSaleStarted(), "You are not eligible to pre-mint");
     }
@@ -105,7 +106,7 @@ contract Jims is ERC721Enumerable, Ownable {
     require(feeSent, "Transfer to fee wallet failed");
 
     for (uint256 i = 0; i < n; i++) {
-      _safeMint(msg.sender, totalSupply() + 1);
+      _safeMint(msg.sender, mintedSoFar + 1 + i);
     }
   }
 
