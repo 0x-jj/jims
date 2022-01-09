@@ -1,6 +1,6 @@
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
@@ -8,13 +8,17 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 
 
 // SPDX-License-Identifier: MIT
-contract Jims is ERC721URIStorage, Ownable {
-  address _feeWallet;
+contract Jims is ERC721Enumerable, Ownable {
+  address[] public _whitelistedERC20s;
+  address[] public _whitelistedERC721s;
+  mapping (address => uint256) public _erc20MinBals;
+  mapping (address => uint256) public _erc721MinBals;
+
+  address public _feeWallet;
   uint256 public _totalSupply;
   uint256 public _preMintSupply;
   mapping (address => bool) public _whitelistedAddresses;
   mapping (address => bool) public _preMintedAddresses;
-  mapping (address => uint256[]) public _ownedByAddress;
 
   uint256 public _totalMinted = 0;
   uint256 public _totalPreMinted = 0;
@@ -28,6 +32,10 @@ contract Jims is ERC721URIStorage, Ownable {
     _totalSupply = totalSupply;
     _preMintSupply = preMintSupply;
     _whitelistToadzBuilders();
+  }
+
+  function _baseURI() internal view virtual override returns (string memory) {
+      return "ipfs://QmcnnBXi99renVhnr3wX14TEj3k2EiGHFnn1gQGJhZBmeX/";
   }
 
   function allowMinting() public onlyOwner {
@@ -54,13 +62,16 @@ contract Jims is ERC721URIStorage, Ownable {
     (bool feeSent, ) = _feeWallet.call{value: msg.value}("");
     require(feeSent, "Transfer to fee wallet failed");
 
-    _ownedByAddress[msg.sender].push(_totalMinted);
-    _safeMint(msg.sender, _totalMinted);
     _totalMinted += 1;
+    _safeMint(msg.sender, _totalMinted);
   }
 
   function allOwned(address wallet) public view returns (uint256[] memory) {
-    return _ownedByAddress[wallet];
+    uint256[] memory ret = new uint256[](balanceOf(wallet));
+    for (uint256 i = 0; i < balanceOf(wallet); i++) {
+      ret[i] = tokenOfOwnerByIndex(wallet, i);
+    }
+    return ret;
   }
 
   function priceToMint(address wallet) public view returns (uint256) {
@@ -72,14 +83,23 @@ contract Jims is ERC721URIStorage, Ownable {
   }
 
   function isPreMinter(address wallet) public view returns (bool) {
-    IERC20 PRINTS = IERC20(0x4dd28568D05f09b02220b09C2cb307bFd837cb95);
-    IERC20 RAW = IERC20(0xb41F289d699C5e79A51Cb29595c203cFaE85F32a);
-    IERC721 NOUNS = IERC721(0x9C8fF314C9Bc7F6e59A9d9225Fb22946427eDC03);
-    IERC721 AVID_LINES = IERC721(0xDFAcD840f462C27b0127FC76b63e7925bEd0F9D5);
-    IERC721 AUTO_GLYPHS = IERC721(0xd4e4078ca3495DE5B1d4dB434BEbc5a986197782);
+    for (uint256 i = 0; i < _whitelistedERC20s.length; i++) {
+      address erc20 = _whitelistedERC20s[i];
+      uint256 minBal = _erc20MinBals[erc20];
+      if (IERC20(erc20).balanceOf(wallet) >= minBal) {
+        return true;
+      }
+    }
 
-    return PRINTS.balanceOf(wallet) >= 1000 || RAW.balanceOf(wallet) >= 500 || NOUNS.balanceOf(wallet) >= 1 ||
-      AVID_LINES.balanceOf(wallet) >= 1 || AUTO_GLYPHS.balanceOf(wallet) >= 1 || _whitelistedAddresses[wallet];
+    for (uint256 i = 0; i < _whitelistedERC721s.length; i++) {
+      address erc721  = _whitelistedERC721s[i];
+      uint256 minBal = _erc721MinBals[erc721];
+      if (IERC721(erc721).balanceOf(wallet) >= minBal) {
+        return true;
+      }
+    }
+
+    return _whitelistedAddresses[wallet];
   }
 
   function _whitelistToadzBuilders() private {

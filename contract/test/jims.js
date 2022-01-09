@@ -47,12 +47,15 @@ describe("Jims", () => {
   it("Mint works if paying more than the mint price", async () => {
     const feeWalletBalance = await ethers.provider.getBalance(accounts[FEE]);
     const mintPrice = await jims._priceToMint();
-    const totalMinted = await jims._totalMinted();
+    const prevTotalMinted = await jims._totalMinted();
 
     await jims.connect(signers[1]).mint({value: mintPrice});
 
+    const totalMinted = await jims._totalMinted();
+
     expect(await jims.ownerOf(totalMinted)).to.equal(signers[1].address);
-    expect(await jims._totalMinted()).to.equal(totalMinted + 1);
+    expect(await jims.tokenURI(totalMinted)).to.equal(`ipfs://QmcnnBXi99renVhnr3wX14TEj3k2EiGHFnn1gQGJhZBmeX/${totalMinted}`)
+    expect(totalMinted).to.equal(prevTotalMinted + 1);
     expect(await jims._priceToMint() > mintPrice);
     expect(await ethers.provider.getBalance(accounts[FEE])).to.equal(feeWalletBalance.add(mintPrice));
   });
