@@ -14,22 +14,23 @@ contract Jims is ERC721Enumerable, Ownable {
   mapping (address => uint256) public _erc20MinBals;
   mapping (address => uint256) public _erc721MinBals;
 
-  address public _feeWallet;
-  uint256 public maxSupply;
-  uint256 public preMintSupply;
+  uint256 public constant priceToMint = 0.069 ether;
+  address public immutable _feeWallet;
+  uint256 public immutable maxSupply;
+  uint256 public immutable preMintSupply;
+  uint256 public immutable maxMintPerTransaction;
+  uint256 private immutable _obfuscationOffset;
+
   uint256 public preMintStartTime;
-  uint256 public maxMintPerTransaction;
   mapping (address => bool) public _whitelistedAddresses;
   mapping (address => bool) public _preMintedAddresses;
   mapping (uint256 => bool) public _preMintedTokenIds;
 
   uint256 public totalPreMinted = 0;
-  uint256 public priceToMint = 0.069 ether;
   bool public mintAllowed = false;
   bool public devMintLocked = false;
   string public baseURI = "ipfs://QmcnnBXi99renVhnr3wX14TEj3k2EiGHFnn1gQGJhZBmeX/";
 
-  uint256 private _obfuscationOffset;
 
   constructor(address feeWallet, uint256 preMintSupply_, uint256 maxSupply_, uint256 maxMintPerTransaction_, uint256 obfuscationOffset) ERC721("The Jims", "JIM") {
     require(preMintSupply_ <= maxSupply_, "preMintSupply must <= maxSupply");
