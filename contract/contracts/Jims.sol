@@ -29,6 +29,7 @@ contract Jims is ERC721Enumerable, Ownable {
   uint256 public totalPreMinted = 0;
   bool public mintAllowed = false;
   bool public devMintLocked = false;
+  bool public baseURILocked = false;
   string public baseURI = "ipfs://QmcnnBXi99renVhnr3wX14TEj3k2EiGHFnn1gQGJhZBmeX/";
 
 
@@ -223,7 +224,9 @@ contract Jims is ERC721Enumerable, Ownable {
   }
 
   function _setBaseURI(string memory baseURI_) external onlyOwner {
-      baseURI = baseURI_;
+    require(baseURILocked == false, "Can only set Base URI once");
+    baseURI = baseURI_;
+    baseURILocked = true;
   }
 
 }
