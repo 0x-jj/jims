@@ -104,13 +104,10 @@ contract Jims is ERC721Enumerable, Ownable {
     require(feeSent, "Transfer to fee wallet failed");
 
     for (uint256 i = 0; i < n; i++) {
-      _safeMint(msg.sender, _bijectTokenId(totalSupply() + 1));
+      _safeMint(msg.sender, totalSupply() + 1);
     }
   }
 
-  function _bijectTokenId(uint256 tokenId) private view returns (uint256) {
-    return (tokenId + _obfuscationOffset) % maxSupply;
-  }
 
   function allOwned(address wallet) public view returns (uint256[] memory) {
     uint256[] memory ret = new uint256[](balanceOf(wallet));
@@ -144,10 +141,18 @@ contract Jims is ERC721Enumerable, Ownable {
     return _whitelistedAddresses[wallet];
   }
 
+  function _safeMint(address recipient, uint256 tokenId) internal override {
+    super._safeMint(recipient, _bijectTokenId(tokenId));
+  }
+
+  function _bijectTokenId(uint256 tokenId) internal view returns (uint256) {
+    return (tokenId + _obfuscationOffset) % maxSupply;
+  }
+
   function mintSpecial(address recipient) external onlyOwner {
         require(!devMintLocked, "Dev Mint Permanently Locked");
         for (uint256 i = 0; i < 10; i++) {
-            _safeMint(recipient, _bijectTokenId(totalSupply() + 1));
+            _safeMint(recipient, totalSupply() + 1);
         }
         devMintLocked = true;
     }
