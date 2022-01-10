@@ -31,7 +31,8 @@ async function main() {
     accounts[FEE],
     PREMINT_SUPPLY,
     TOTAL_SUPPLY,
-    MAX_MINT_PER_TX
+    MAX_MINT_PER_TX,
+    49
   );
   assert.notEqual(jims, undefined, "Jims contract instance is undefined.");
 }

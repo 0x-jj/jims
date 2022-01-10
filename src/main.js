@@ -264,11 +264,11 @@ const createDna = (_layers) => {
       random -= layer.elements[i].weight;
       if (random < 0) {
         const clashMonitor = {
-          'head_jimbun.png': 'bg_void.png',
-          'head_messy.png': 'bg_void.png',
-          'head_doublebuns.png': 'bg_void.png',
-          'head_bedtime#65.png': 'bg_void.png',
-          'head_goodtime#50.png': 'bg_blue.png',
+          "head_jimbun.png": "bg_lightvoid.png",
+          "head_messy.png": "bg_lightvoid.png",
+          "head_doublebuns.png": "bg_lightvoid.png",
+          "head_bedtime#65.png": "bg_lightvoid.png",
+          "head_goodtime#50.png": "bg_blue.png",
         };
         if (layer.elements[i].filename in clashMonitor) {
           for (let n = 0; n < dna.length; n++) {
@@ -292,7 +292,7 @@ const createDna = (_layers) => {
 };
 
 const writeMetaData = (_data) => {
-  fs.writeFileSync(`${buildDir}/json/_metadata.json`, _data);
+  fs.writeFileSync(`${buildDir}/json/_metadata`, _data);
 };
 
 const saveMetaDataSingleFile = (_editionCount) => {
@@ -303,7 +303,7 @@ const saveMetaDataSingleFile = (_editionCount) => {
       )
     : null;
   fs.writeFileSync(
-    `${buildDir}/json/${_editionCount}.json`,
+    `${buildDir}/json/${_editionCount}`,
     JSON.stringify(metadata, null, 2)
   );
 };

@@ -5,7 +5,7 @@ const fs = require('fs');
 const namePrefix = 'Jim';
 const description =
   'A collection of 2048 unique Jims, made with <3 by FingerprintsDAO.';
-const baseUri = 'ipfs://NewUriToReplace';
+const baseUri = "ipfs://QmQbmFM94NLGmoXrLbga14gmBScYvJQGxmeYeMWo9J9tyY";
 
 const layerConfigurations = [
   {

@@ -8,24 +8,24 @@ const {
 } = require(`${basePath}/src/config.js`);
 
 // read json data
-let rawdata = fs.readFileSync(`${basePath}/build/json/_metadata.json`);
+let rawdata = fs.readFileSync(`${basePath}/build/json/_metadata`);
 let data = JSON.parse(rawdata);
 
 data.forEach((item) => {
   item.name = `${namePrefix} #${item.edition}`;
   item.description = description;
-  const fileExt = item.image.split('.').pop();
+  const fileExt = item.image.split(".").pop();
 
   item.image = `${baseUri}/${item.edition}.${fileExt}`;
 
   fs.writeFileSync(
-    `${basePath}/build/json/${item.edition}.json`,
+    `${basePath}/build/json/${item.edition}`,
     JSON.stringify(item, null, 2)
   );
 });
 
 fs.writeFileSync(
-  `${basePath}/build/json/_metadata.json`,
+  `${basePath}/build/json/_metadata`,
   JSON.stringify(data, null, 2)
 );
 

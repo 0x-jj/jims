@@ -30,7 +30,7 @@ contract Jims is ERC721Enumerable, Ownable {
   bool public mintAllowed = false;
   bool public devMintLocked = false;
   bool public baseURILocked = false;
-  string public baseURI = "ipfs://QmcnnBXi99renVhnr3wX14TEj3k2EiGHFnn1gQGJhZBmeX/";
+  string public baseURI = "ipfs://QmSNKm7dtDTfjiSpMwz5LxPkG8CVuFNoQCJKa5Dvmd7AhW/";
 
 
   constructor(address feeWallet, uint256 preMintSupply_, uint256 maxSupply_, uint256 maxMintPerTransaction_, uint256 obfuscationOffset) ERC721("The Jims", "JIM") {
