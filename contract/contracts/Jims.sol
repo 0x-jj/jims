@@ -65,10 +65,6 @@ contract Jims is ERC721Enumerable, Ownable {
     _whitelistedAddresses[wallet] = true;
   }
 
-  function totalMinted() public view returns (uint256) {
-    return totalSupply();
-  }
-
   function wasPreMinted(uint256 tokenId) public view returns (bool) {
     return _preMintedTokenIds[tokenId];
   }

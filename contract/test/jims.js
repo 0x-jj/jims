@@ -57,7 +57,7 @@ describe("Jims", () => {
 
   it("Total minted returns 0 initially", async () => {
     const jims = await deploy();
-    expect(await jims.totalMinted()).to.equal(0);
+    expect(await jims.totalSupply()).to.equal(0);
   });
 
   it("Mint fails if paying less than the mint price", async () => {
@@ -72,7 +72,7 @@ describe("Jims", () => {
       jims.connect(signers[1]).mint(1, { value: mintPrice.sub(1) }),
       /Not enough ether/
     );
-    expect(await jims.totalMinted()).to.equal(0);
+    expect(await jims.totalSupply()).to.equal(0);
   });
 
   it("Premint fails if user not whitelisted", async () => {
@@ -91,7 +91,7 @@ describe("Jims", () => {
 
     const feeWalletBalance = await ethers.provider.getBalance(accounts[FEE]);
     const mintPrice = await jims.priceToMint();
-    const prevTotalMinted = await jims.totalMinted();
+    const prevTotalMinted = await jims.totalSupply();
 
     await assert.rejects(
       jims.connect(signers[1]).mint(1, { value: mintPrice }),
@@ -107,7 +107,7 @@ describe("Jims", () => {
 
     expect(await jims.ownerOf(mintedId)).to.equal(signers[1].address);
     expect(await jims.tokenURI(mintedId)).to.equal(`ipfs://QmcnnBXi99renVhnr3wX14TEj3k2EiGHFnn1gQGJhZBmeX/${mintedId}`)
-    expect(await jims.totalMinted()).to.equal(prevTotalMinted + 1);
+    expect(await jims.totalSupply()).to.equal(prevTotalMinted + 1);
     expect(await jims.priceToMint() > mintPrice);
     expect(await ethers.provider.getBalance(accounts[FEE])).to.equal(feeWalletBalance.add(mintPrice));
 
@@ -206,7 +206,7 @@ describe("Jims", () => {
     await autoglyphs.createNft(accounts[1]);
     await autoglyphs.createNft(accounts[2]);
 
-    expect(await jims.totalMinted()).to.equal(10);
+    expect(await jims.totalSupply()).to.equal(10);
     expect(await jims.totalPreMinted()).to.equal(0);
     expect(await jims.publicSaleStarted()).to.equal(false);
 
@@ -221,18 +221,18 @@ describe("Jims", () => {
     const mintedId2 = (await jims.allOwned(accounts[2]))[0];
 
     expect(await jims.wasPreMinted(mintedId2)).to.equal(true);
-    expect(await jims.totalMinted()).to.equal(12);
+    expect(await jims.totalSupply()).to.equal(12);
     expect(await jims.totalPreMinted()).to.equal(2);
     expect(await jims.publicSaleStarted()).to.equal(true);
 
     // Mint the rest of the supply
     const maxSupply = (await jims.maxSupply()).toNumber();
-    for (let i = (await jims.totalMinted()).toNumber(); i < maxSupply; i++) {
+    for (let i = (await jims.totalSupply()).toNumber(); i < maxSupply; i++) {
       await jims
         .connect(signers[3])
         .mint(1, { value: await jims.priceToMint() });
     }
-    expect(await jims.totalMinted()).to.equal(maxSupply);
+    expect(await jims.totalSupply()).to.equal(maxSupply);
     expect(await jims.totalPreMinted()).to.equal(preMintSupply);
 
     await assert.rejects(
@@ -280,7 +280,7 @@ describe("Jims", () => {
   it("Dev mint works only once", async () => {
     const jims = await deploy();
     await jims.connect(signers[0]).mintSpecial(accounts[1]);
-    expect(await jims.totalMinted()).to.equal(10);
+    expect(await jims.totalSupply()).to.equal(10);
 
     // now expect it to fail
     await assert.rejects(
