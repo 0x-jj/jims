@@ -106,10 +106,14 @@ describe("Jims", () => {
     const mintedId = (await jims.allOwned(accounts[1]))[0];
 
     expect(await jims.ownerOf(mintedId)).to.equal(signers[1].address);
-    expect(await jims.tokenURI(mintedId)).to.equal(`ipfs://QmcnnBXi99renVhnr3wX14TEj3k2EiGHFnn1gQGJhZBmeX/${mintedId}`)
+    expect(await jims.tokenURI(mintedId)).to.equal(
+      `ipfs://QmSNKm7dtDTfjiSpMwz5LxPkG8CVuFNoQCJKa5Dvmd7AhW/${mintedId}`
+    );
     expect(await jims.totalSupply()).to.equal(prevTotalMinted + 1);
-    expect(await jims.priceToMint() > mintPrice);
-    expect(await ethers.provider.getBalance(accounts[FEE])).to.equal(feeWalletBalance.add(mintPrice));
+    expect((await jims.priceToMint()) > mintPrice);
+    expect(await ethers.provider.getBalance(accounts[FEE])).to.equal(
+      feeWalletBalance.add(mintPrice)
+    );
 
     await assert.rejects(
       jims.connect(signers[1]).mint(1, { value: mintPrice }),
@@ -120,7 +124,9 @@ describe("Jims", () => {
   it("Premint works with erc20", async () => {
     const jims = await deploy();
     const prints = await deployPrints();
-    await jims.connect(signers[0]).whitelistERC20(prints.address, 1000);
+    await jims
+      .connect(signers[0])
+      .whitelistERC20(prints.address, ethers.utils.parseEther("1000"));
 
     const mintPrice = await jims.priceToMint();
     await assert.rejects(
@@ -128,13 +134,13 @@ describe("Jims", () => {
       /You are not eligible to pre-mint/
     );
 
-    await prints.mint(accounts[1], 500);
+    await prints.mint(accounts[1], ethers.utils.parseEther("500"));
     await assert.rejects(
       jims.connect(signers[1]).mint(1, { value: mintPrice }),
       /You are not eligible to pre-mint/
     );
 
-    await prints.mint(accounts[1], 500);
+    await prints.mint(accounts[1], ethers.utils.parseEther("500"));
 
     // Premint should work
     expect(await jims.balanceOf(accounts[1])).to.equal(0);
@@ -211,12 +217,12 @@ describe("Jims", () => {
     expect(await jims.publicSaleStarted()).to.equal(false);
 
     // Premint the entire pre-mint supply
-    await jims.connect(signers[1]).mint(1, {value: price});
+    await jims.connect(signers[1]).mint(1, { value: price });
     expect((await jims.allOwned(accounts[1])).length).to.equal(1);
     const mintedId1 = (await jims.allOwned(accounts[1]))[0];
     expect(await jims.wasPreMinted(mintedId1)).to.equal(true);
 
-    await jims.connect(signers[2]).mint(1, {value: price});
+    await jims.connect(signers[2]).mint(1, { value: price });
     expect((await jims.allOwned(accounts[2])).length).to.equal(1);
     const mintedId2 = (await jims.allOwned(accounts[2]))[0];
 
@@ -293,7 +299,7 @@ describe("Jims", () => {
     const jims = await deploy();
     const initialBaseURI = await jims.baseURI();
     expect(initialBaseURI).to.equal(
-      "ipfs://QmcnnBXi99renVhnr3wX14TEj3k2EiGHFnn1gQGJhZBmeX/"
+      "ipfs://QmSNKm7dtDTfjiSpMwz5LxPkG8CVuFNoQCJKa5Dvmd7AhW/"
     );
     await jims._setBaseURI("setToSomethingElse/");
     const newBaseURI = await jims.baseURI();

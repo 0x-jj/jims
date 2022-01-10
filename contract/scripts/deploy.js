@@ -6,6 +6,16 @@ const PREMINT_SUPPLY = 512;
 const TOTAL_SUPPLY = 2048;
 const MAX_MINT_PER_TX = 20;
 
+const deployAutoglyphs = async () => {
+  const fact = await ethers.getContractFactory("Autoglyphs");
+  return await fact.deploy();
+};
+
+const deployPrints = async () => {
+  const fact = await ethers.getContractFactory("Fingerprints");
+  return await fact.deploy();
+};
+
 // This is a script for deploying your contracts. You can adapt it to deploy
 // yours, or create new ones.
 async function main() {
@@ -17,6 +27,12 @@ async function main() {
         " option '--network localhost'"
     );
   }
+
+  // deploy and distribute fake erc20
+  const prints = await deployPrints();
+
+  // deploy and distribute fake erc721
+  const autoglyphs = await deployAutoglyphs();
 
   // ethers is avaialble in the global scope
   const factory = await ethers.getContractFactory("Jims");
@@ -35,6 +51,17 @@ async function main() {
     49
   );
   assert.notEqual(jims, undefined, "Jims contract instance is undefined.");
+  console.log("Jims address:", jims.address);
+  console.log("Prints address:", prints.address);
+  await jims
+    .connect(signers[0])
+    .whitelistERC20(prints.address, ethers.utils.parseEther("1000"));
+
+  await jims.connect(signers[0]).whitelistERC721(autoglyphs.address, 1);
+
+  await jims.connect(signers[0]).allowMinting();
+  await prints.mint(accounts[1], ethers.utils.parseEther("1000"));
+  await autoglyphs.createNft(accounts[2]);
 }
 
 main()
