@@ -4,8 +4,8 @@ const fs = require('fs');
 
 const namePrefix = 'Jim';
 const description =
-  'A collection of 2048 unique Jims, made with <3 by FingerprintsDAO.';
-const baseUri = "ipfs://QmQbmFM94NLGmoXrLbga14gmBScYvJQGxmeYeMWo9J9tyY";
+  "The Jims are a collection of 2048 small amphibious Jim Simons, trying to escape the tyrannical rule of the Evil Value Investor Gremplin. A FingerprintsDAO drop created by DAO member Gremplin, with a small bit of help from his friends. \n\nThis project is in the public domain, CC0. Feel free to use Jims in any way you want.";
+const baseUri = "ipfs://QmcKy13BCS3vEy6TFcgRHYucdXi4BQxjxE1zvLsKgNQSua";
 
 const layerConfigurations = [
   {
